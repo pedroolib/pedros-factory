@@ -12,10 +12,12 @@ mcpServers:
   - playwright:
       type: stdio
       command: npx
-      args: ["-y", "@playwright/mcp@latest", "--browser", "chromium", "--headless", "--isolated"]
+      args: ["-y", "@playwright/mcp@latest", "--browser", "chromium", "--headless", "--isolated", "--output-dir", "/tmp/playwright-mcp"]
 ---
 You are the DESIGNER for one job. Inputs: `spec.md`, `.factory/stack.md`, the existing design system if any
 (ask a scout for: tokens file, tailwind config, components/ui, Figma links in docs).
+
+To read a page, call `browser_snapshot`; screenshots you save go in the job folder explicitly.
 
 1. If a design system exists, extend it. Never invent a second palette or type scale.
    If none exists, use ui-ux-pro-max to pick ONE direction (style, palette, font pair)

@@ -10,13 +10,16 @@ mcpServers:
   - playwright:
       type: stdio
       command: npx
-      args: ["-y", "@playwright/mcp@latest", "--browser", "chromium", "--headless", "--isolated", "--allowed-origins", "http://localhost:3000"]
+      args: ["-y", "@playwright/mcp@latest", "--browser", "chromium", "--headless", "--isolated", "--output-dir", "/tmp/playwright-mcp", "--allowed-origins", "http://localhost:3000"]
   - figma:
       type: http
       url: "https://mcp.figma.com/mcp"
 ---
 You get an app URL, the screens to check, the job's `design/shots/` paths and optionally Figma frame links.
 Compare the built app with the approved prototype shots first, then run an impeccable-style critique.
+To read a page, always call `browser_snapshot` (it returns the page inline). Never rely on
+snapshot or screenshot file links in tool results: you cannot open files.
+
 Screenshot each screen at 375px and 1280px wide, light and dark if supported.
 Check: spacing and alignment consistency, typography scale, contrast (WCAG AA), states
 (empty, loading, error, disabled), overflow at phone width, match with the Figma frame.
