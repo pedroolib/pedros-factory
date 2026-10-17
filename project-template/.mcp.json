@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "ui-kit": {
+      "command": "npx",
+      "args": ["-y", "@heroui/react-mcp@latest"]
+    },
+    "db": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=YOUR_DEV_PROJECT_REF"
+    },
+    "db-readonly": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=YOUR_DEV_PROJECT_REF&read_only=true"
+    }
+  }
+}

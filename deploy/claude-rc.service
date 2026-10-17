@@ -1,0 +1,16 @@
+# ~/.config/systemd/user/claude-rc.service on the homelab
+# First run `claude remote-control` once by hand inside the project folder to accept
+# the trust + Remote Control prompts (they need a TTY), then enable this unit:
+#   systemctl --user enable --now claude-rc && loginctl enable-linger $USER
+[Unit]
+Description=Claude Code Remote Control server (orchestrator)
+After=network-online.target
+
+[Service]
+WorkingDirectory=%h/projects/myapp
+ExecStart=/usr/bin/tmux new-session -d -s claude-rc 'claude remote-control --spawn worktree --capacity 4 --name homelab-orchestrator'
+Type=forking
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
