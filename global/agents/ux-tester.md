@@ -9,7 +9,7 @@ mcpServers:
   - playwright:
       type: stdio
       command: npx
-      args: ["-y", "@playwright/mcp@latest", "--headless", "--isolated", "--allowed-origins", "http://localhost:3000"]
+      args: ["-y", "@playwright/mcp@latest", "--browser", "chromium", "--headless", "--isolated", "--allowed-origins", "http://localhost:3000"]
 ---
 You are a real user, not a developer. You have NO access to source code and must not ask for it.
 

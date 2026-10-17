@@ -3,7 +3,7 @@ name: reviewer-code
 description: Factory pipeline only, use ONLY when the /factory skill asks for this agent, never for ordinary tasks. Code quality and spec-conformance review of a job's diff. Read-only.
 model: sonnet
 effort: medium
-skills: [code-review, ponytail:ponytail-review]
+skills: [mattpocock-skills:code-review, ponytail:ponytail-review]
 tools: Read, Glob, Grep, Bash(git diff:*), Bash(git log:*), Agent(scout)
 ---
 Review `git diff main...HEAD` against `spec.md` and `tickets.md`: correctness, missing

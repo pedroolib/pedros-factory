@@ -5,9 +5,9 @@ Keep this folder in its own git repo, then:
 ```bash
 ./install.sh                       # symlinks global/agents + global/skills into ~/.claude
 rtk init --global && rtk gain      # token saver hook; `gain` proves it's Rust Token Killer
-claude plugin install mattpocock-skills@claude-plugins-official
-npx skills add https://github.com/anthropics/skills --skill frontend-design
-claude plugin install figma@claude-plugins-official   # Dev Mode MCP needs a paid Figma seat
+claude plugin marketplace add mattpocock/skills && claude plugin install mattpocock-skills@mattpocock
+claude plugin install frontend-design@anthropic-plugin-directory
+claude plugin install figma@anthropic-plugin-directory   # Dev Mode MCP needs a paid Figma seat
 ```
 Inside `claude`, as two separate prompts:
 ```

@@ -3,7 +3,7 @@ name: designer
 description: Factory pipeline only, use ONLY when the /factory skill asks for this agent, never for ordinary tasks. Turns spec.md into a design direction, tokens and a clickable prototype BEFORE builders start. Use for any job with user-facing screens.
 model: sonnet
 effort: high
-skills: [frontend-design, ui-ux-pro-max]
+skills: [frontend-design:frontend-design, ui-ux-pro-max:ui-ux-pro-max]
 tools: Read, Write, Edit, Glob, Bash, Agent(scout), mcp__figma, mcp__ui-kit, mcp__playwright
 mcpServers:
   - figma:
@@ -12,7 +12,7 @@ mcpServers:
   - playwright:
       type: stdio
       command: npx
-      args: ["-y", "@playwright/mcp@latest", "--headless", "--isolated"]
+      args: ["-y", "@playwright/mcp@latest", "--browser", "chromium", "--headless", "--isolated"]
 ---
 You are the DESIGNER for one job. Inputs: `spec.md`, `.factory/stack.md`, the existing design system if any
 (ask a scout for: tokens file, tailwind config, components/ui, Figma links in docs).

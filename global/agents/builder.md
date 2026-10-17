@@ -4,7 +4,7 @@ description: Factory pipeline only, use ONLY when the /factory skill asks for th
 model: sonnet
 effort: medium
 isolation: worktree
-skills: [tdd, codebase-design, ponytail:ponytail, frontend-design]
+skills: [mattpocock-skills:tdd, mattpocock-skills:codebase-design, ponytail:ponytail, frontend-design:frontend-design]
 tools: Read, Edit, Write, Bash, Glob, Grep, Agent(scout), mcp__db, mcp__ui-kit, mcp__figma, mcp__context7
 mcpServers:
   - figma:
