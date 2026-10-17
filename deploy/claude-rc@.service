@@ -2,6 +2,7 @@
 # <folder> is a directory under ~/projects. Before the first start, run once by hand:
 #   cd ~/projects/<folder> && claude remote-control     (accept trust + Remote Control, then Ctrl+C)
 # Needs: loginctl enable-linger $USER   (keeps user services running while logged out)
+# Secrets (e.g. SUPABASE_ACCESS_TOKEN=...) go in ~/.config/claude-rc/<folder>.env, chmod 600.
 # Attach to watch it: tmux attach -t claude-rc-<folder>
 [Unit]
 Description=Claude Code Remote Control server for ~/projects/%i
@@ -10,6 +11,7 @@ After=network-online.target
 [Service]
 Type=forking
 WorkingDirectory=%h/projects/%i
+EnvironmentFile=-%h/.config/claude-rc/%i.env
 Environment=PATH=%h/.local/node/bin:%h/.local/bin:/usr/local/bin:/usr/bin:/bin
 ExecStart=/usr/bin/tmux new-session -d -s claude-rc-%i "claude remote-control --spawn worktree --capacity 4 --name %i"
 ExecStop=/usr/bin/tmux kill-session -t claude-rc-%i

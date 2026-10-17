@@ -2,15 +2,24 @@
   "mcpServers": {
     "ui-kit": {
       "command": "npx",
-      "args": ["-y", "@heroui/react-mcp@latest"]
+      "args": [
+        "-y",
+        "@heroui/react-mcp@latest"
+      ]
     },
     "db": {
       "type": "http",
-      "url": "https://mcp.supabase.com/mcp?project_ref=YOUR_DEV_PROJECT_REF"
+      "url": "https://mcp.supabase.com/mcp?project_ref=YOUR_DEV_PROJECT_REF",
+      "headers": {
+        "Authorization": "Bearer ${SUPABASE_ACCESS_TOKEN}"
+      }
     },
     "db-readonly": {
       "type": "http",
-      "url": "https://mcp.supabase.com/mcp?project_ref=YOUR_DEV_PROJECT_REF&read_only=true"
+      "url": "https://mcp.supabase.com/mcp?project_ref=YOUR_DEV_PROJECT_REF&read_only=true",
+      "headers": {
+        "Authorization": "Bearer ${SUPABASE_ACCESS_TOKEN}"
+      }
     }
   }
 }
