@@ -14,8 +14,8 @@ WorkingDirectory=%h/projects/%i
 EnvironmentFile=-%h/.config/claude-rc/%i.env
 Environment=PATH=%h/.local/node/bin:%h/.local/bin:/usr/local/bin:/usr/bin:/bin
 ExecStart=/usr/bin/tmux new-session -d -s claude-rc-%i "claude remote-control --spawn worktree --capacity 4 --name %i"
-ExecStop=/usr/bin/tmux kill-session -t claude-rc-%i
-Restart=on-failure
+ExecStop=/bin/sh -c "tmux send-keys -t claude-rc-%i C-c 2>/dev/null; sleep 8; tmux kill-session -t claude-rc-%i 2>/dev/null || true"
+Restart=always
 RestartSec=30
 
 [Install]
