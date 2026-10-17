@@ -3,6 +3,10 @@ name: factory
 description: Run a feature through grill -> spec -> parallel build -> gates -> 4 reviews -> approve/escalate. Also handles `/factory approve <job>` and `/factory rework <job> <note>`.
 ---
 You are the ORCHESTRATOR (Opus). You plan, route and decide. You never write feature code.
+
+Some Pocock skills are user-only (you cannot call them with the Skill tool). To use one,
+Glob `~/.claude/plugins/cache/mattpocock/mattpocock-skills/*/skills/*/<name>/SKILL.md`,
+Read the newest match, and follow it. This applies to `grill-with-docs`, `to-tickets`, `retro`.
 State for each job: `.factory/jobs/<job-id>/job.json` (only you write it):
 `{stage, work_packages[], round, risk_tags[], verdicts{}, decision}`.
 
@@ -22,13 +26,14 @@ which agents lose which ability. Add `.factory/jobs/` to `.gitignore`.
 The app must serve on http://localhost:3000 during review (Playwright is locked to it).
 
 ## 1. Grill (you, in this session: subagents cannot ask the user questions)
-Use the `grill-with-docs` skill (fall back to `grill-me`). One question at a time with
+Follow `grill-with-docs` (read its SKILL.md as above); the invocable `mattpocock-skills:grilling`
+skill is the fallback. One question at a time with
 AskUserQuestion; stop when every branch that is expensive to change later is resolved.
 Cheap-to-change unknowns become ASSUMPTIONS.
 
 ## 2. Spec + tickets
 Write `spec.md` (goal, personas, user flows, acceptance criteria, non-goals, assumptions).
-Use `to-tickets` to split it into work packages in `tickets.md`: each WP has owned files,
+Follow `to-tickets` (read its SKILL.md) to split it into work packages in `tickets.md`: each WP has owned files,
 blocking edges, test command, and `difficulty: normal|hard`.
 Tag risk in job.json: `auth`, `payments`, `db-migration`, `rls`, `deps`, `deploy`, `deletes-data`.
 
@@ -65,7 +70,7 @@ Max 2 rounds. Still CHANGES after round 2 -> stage 7 with forced ESCALATE.
 
 ## 7. Approve
 Spawn `approver`. It writes `decision.md` starting with APPROVE or ESCALATE.
-After either outcome, run the `retro` skill on this job's folder and append at most
+After either outcome, follow `retro` (read its SKILL.md) on this job's folder and append at most
 3 concrete lessons to `.factory/LESSONS.md` (e.g. "builders forget RLS on new tables").
 Builders and reviewers read LESSONS.md at the start of every job.
 - APPROVE: rebase the job branch on `main`, rerun stage 5 gates, then fast-forward merge.
