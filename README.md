@@ -42,8 +42,10 @@ names the servers `ui-kit`, `db` and `db-readonly`, and the agents only ever use
 
 ## Install (once per machine)
 
+The repo is private, so clone it with the GitHub CLI (`gh auth login` first) or an SSH key:
+
 ```bash
-git clone https://github.com/pedroolib/pipeline-kit.git ~/pipeline-kit
+gh repo clone pedroolib/pipeline-kit ~/pipeline-kit
 ```
 ```bash
 ~/pipeline-kit/bootstrap.sh
