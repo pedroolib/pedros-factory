@@ -67,7 +67,7 @@ claude plugin marketplace update >/dev/null 2>&1 || true
 
 step "Playwright Chromium (for ux-tester, reviewer-ui, designer)"
 pw=$(npm view @playwright/mcp@latest dependencies.playwright)
-npx -y "playwright@$pw" install chromium >/dev/null && echo "ok  chromium for playwright $pw"
+npx -y "playwright@$pw" install chromium >/dev/null 2>&1 && echo "ok  chromium for playwright $pw"
 chrome=$(ls -d "$HOME"/.cache/ms-playwright/chromium-*/chrome-linux*/chrome 2>/dev/null | tail -1)
 if [ -n "$chrome" ] && ldd "$chrome" | grep -q 'not found'; then
   TODO+=("sudo npx -y playwright@$pw install-deps chromium   # missing: $(ldd "$chrome" | awk '/not found/{print $1}' | tr '\n' ' ')")
