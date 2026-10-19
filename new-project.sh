@@ -90,7 +90,8 @@ mkdir -p "$(dirname "$SECRETS")" && chmod 700 "$(dirname "$SECRETS")"
 
 if [ "$NEW_REPO" = yes ]; then
   git add .claude/settings.json .mcp.json .factory/stack.md .gitignore
-  git commit -qm "Set up factory pipeline for $NAME" && echo "committed initial pipeline files"
+  if git commit -qm "Set up factory pipeline for $NAME" 2>/dev/null; then echo "committed initial pipeline files"
+  else echo "NOT committed: set your git identity (git config --global user.name/user.email), then: cd $DIR && git commit -m 'Set up factory pipeline'"; fi
 fi
 
 cat <<EOF

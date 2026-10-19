@@ -84,6 +84,7 @@ systemctl --user daemon-reload && echo "ok  claude-rc@.service"
 [ "$(loginctl show-user "$USER" -p Linger --value 2>/dev/null)" = yes ] || TODO+=("sudo loginctl enable-linger $USER   # keep services running while logged out")
 
 step "Done"
+git config --global user.email >/dev/null || TODO+=("git config --global user.name 'Your Name' && git config --global user.email you@example.com   # builders and the approver commit")
 claude auth status 2>/dev/null | grep -q '"loggedIn": true' || TODO+=("claude   then /login, then /exit   # sign in to your Claude plan")
 if [ ${#TODO[@]} -eq 0 ]; then echo "Nothing left to do. Create a project with ./new-project.sh <name>"
 else echo "Run these yourself, then re-run ./bootstrap.sh:"; printf '  %s\n' "${TODO[@]}"; fi
