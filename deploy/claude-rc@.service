@@ -1,9 +1,7 @@
-# One Remote Control server per project: systemctl --user enable --now claude-rc@<folder>
-# <folder> is a directory under ~/projects. Before the first start, run once by hand:
-#   cd ~/projects/<folder> && claude remote-control     (accept trust + Remote Control, then Ctrl+C)
-# Needs: loginctl enable-linger $USER   (keeps user services running while logged out)
-# Secrets (e.g. SUPABASE_ACCESS_TOKEN=...) go in ~/.config/claude-rc/<folder>.env, chmod 600.
-# Attach to watch it: tmux attach -t claude-rc-<folder>
+# Remote Control server for one project. Installed by bootstrap.sh; new-project.sh prints how
+# to enable it:  systemctl --user enable --now claude-rc@<name>   (project in ~/projects/<name>)
+# Secrets for the project (e.g. SUPABASE_ACCESS_TOKEN=...) go in ~/.config/claude-rc/<name>.env.
+# Watch it: tmux attach -t claude-rc-<name>   (detach: Ctrl+B then D)
 [Unit]
 Description=Claude Code Remote Control server for ~/projects/%i
 After=network-online.target
