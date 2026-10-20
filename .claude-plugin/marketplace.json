@@ -1,0 +1,93 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "pedros-factory",
+  "description": "Pedro's Factory: an Opus-orchestrated software factory (spec, parallel builders, black-box testers, reviewers, approval gate) with profiles for web, robotics, firmware and data/ML.",
+  "owner": {
+    "name": "pedroolib",
+    "url": "https://github.com/pedroolib"
+  },
+  "plugins": [
+    {
+      "name": "factory",
+      "source": "./plugins/factory",
+      "description": "Core pipeline: /factory:setup, :init, :build, :status, :approve, :rework, :doctor. Orchestrator, scouts, builders, code/security reviewers, black-box user tester, approver.",
+      "category": "factory"
+    },
+    {
+      "name": "factory-webdev",
+      "source": "./plugins/factory-webdev",
+      "description": "Web profile: designer, UI reviewer and browser UX tester (Playwright), Figma, UI-kit and database MCP setup.",
+      "category": "factory"
+    },
+    {
+      "name": "factory-robotics",
+      "source": "./plugins/factory-robotics",
+      "description": "Robotics profile: ROS 2 + Gazebo black-box simulation tester and safety reviewer. Real hardware always escalates.",
+      "category": "factory"
+    },
+    {
+      "name": "factory-firmware",
+      "source": "./plugins/factory-firmware",
+      "description": "Firmware profile: PlatformIO gates, simulator or connected-board tester, firmware reviewer. Flashing non-dev boards escalates.",
+      "category": "factory"
+    },
+    {
+      "name": "factory-data",
+      "source": "./plugins/factory-data",
+      "description": "Data/ML profile: smoke-training tester (GPU if present) and data/ML reviewer for leakage and reproducibility.",
+      "category": "factory"
+    },
+    {
+      "name": "mattpocock-skills",
+      "source": {
+        "source": "github",
+        "repo": "mattpocock/skills",
+        "sha": "5beb35b040e3de97e54fa9e386d7e42d15c295c2"
+      },
+      "description": "Pinned dependency: Matt Pocock's engineering skills (grilling, tdd, code-review, to-tickets, retro).",
+      "category": "dependency"
+    },
+    {
+      "name": "ponytail",
+      "source": {
+        "source": "github",
+        "repo": "DietrichGebert/ponytail",
+        "sha": "09c434ab73ca43761c5d8b0c5d341926c2fba710"
+      },
+      "description": "Pinned dependency: Ponytail, smallest-code-that-works guidance for builders.",
+      "category": "dependency"
+    },
+    {
+      "name": "ui-ux-pro-max",
+      "source": {
+        "source": "github",
+        "repo": "nextlevelbuilder/ui-ux-pro-max-skill",
+        "sha": "56ea9cf174ed86786187daa9de0e6247cb0747e4"
+      },
+      "description": "Pinned dependency: UI UX Pro Max design reference (webdev profile).",
+      "category": "dependency"
+    },
+    {
+      "name": "impeccable",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/pbakaus/impeccable.git",
+        "path": "plugin",
+        "sha": "46b822f7dda9f7dba799a9c7776fdc19b3a93559"
+      },
+      "description": "Pinned dependency: Impeccable UI critique (webdev profile).",
+      "category": "dependency"
+    },
+    {
+      "name": "frontend-design",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/anthropics/claude-plugins-official.git",
+        "path": "plugins/frontend-design",
+        "sha": "a0b04d9ddccaabe1976645f68b0eda50f74e7022"
+      },
+      "description": "Pinned dependency: Anthropic's frontend-design skill (webdev profile).",
+      "category": "dependency"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+# Pedro's Factory server add-on: one Remote Control server per project, kept alive by systemd.
+#   systemctl --user enable --now claude-rc@<name>      (project in ~/projects/<name>)
+# Secrets for the project (e.g. SUPABASE_ACCESS_TOKEN=...) go in ~/.config/claude-rc/<name>.env.
+# Watch it: tmux attach -t claude-rc-<name>   (detach: Ctrl+B then D)
+[Unit]
+Description=Claude Code Remote Control server for ~/projects/%i
+After=network-online.target
+
+[Service]
+Type=forking
+WorkingDirectory=%h/projects/%i
+EnvironmentFile=-%h/.config/claude-rc/%i.env
+Environment=FACTORY_SERVER=1
+Environment=PATH=%h/.local/node/bin:%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/usr/bin/tmux new-session -d -s claude-rc-%i "claude remote-control --spawn worktree --capacity 4 --name %i"
+ExecStop=/bin/sh -c "tmux send-keys -t claude-rc-%i C-c 2>/dev/null; sleep 8; tmux kill-session -t claude-rc-%i 2>/dev/null || true"
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=default.target

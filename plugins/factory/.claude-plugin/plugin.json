@@ -1,0 +1,21 @@
+{
+  "name": "factory",
+  "displayName": "Pedro's Factory",
+  "version": "2.0.0",
+  "description": "Core software-factory pipeline: grill, spec, parallel builders, gates, reviews, black-box user tester, approval.",
+  "author": {
+    "name": "pedroolib",
+    "url": "https://github.com/pedroolib"
+  },
+  "repository": "https://github.com/pedroolib/pedros-factory",
+  "license": "MIT",
+  "keywords": [
+    "factory",
+    "agents",
+    "pipeline"
+  ],
+  "dependencies": [
+    "mattpocock-skills",
+    "ponytail"
+  ]
+}

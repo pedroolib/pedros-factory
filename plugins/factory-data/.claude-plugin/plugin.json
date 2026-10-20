@@ -1,0 +1,20 @@
+{
+  "name": "factory-data",
+  "displayName": "Pedro's Factory: Data/ML",
+  "version": "2.0.0",
+  "description": "Data/ML profile for Pedro's Factory: smoke-training tester, data reviewer.",
+  "author": {
+    "name": "pedroolib",
+    "url": "https://github.com/pedroolib"
+  },
+  "repository": "https://github.com/pedroolib/pedros-factory",
+  "license": "MIT",
+  "keywords": [
+    "factory",
+    "agents",
+    "pipeline"
+  ],
+  "dependencies": [
+    "factory"
+  ]
+}

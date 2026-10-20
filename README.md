@@ -1,175 +1,192 @@
-# pipeline-kit
+# Pedro's Factory
 
-A Claude Code "software factory" that runs on your own Linux server and that you drive from the
-Claude mobile app. You describe a feature to one Opus orchestrator. It grills you, writes a spec,
-runs parallel builders, checks the result with reviewers and a black-box UX tester, then merges
-or asks you.
+A software factory for Claude Code. You describe a feature to one Opus orchestrator. It
+questions you until the spec is solid, runs parallel builders, checks the result with
+deterministic gates, reviewers and a **black-box tester that never sees the code**, then
+merges or asks you. It works for web apps, robotics, firmware, data/ML and plain code, on
+Linux, macOS and WSL, on a laptop or on an always-on server you reach from your phone.
 
 ```
-/factory <feature>
-  1  grill      Opus (you, in the session)    asks until the spec has no expensive unknowns
-  2  spec       Opus                          spec.md + tickets.md (work packages, owned files)
-  2b design     designer       Sonnet         tokens, prototype, screenshots -> you approve
-  3  build      builder x N    Sonnet         one git worktree each; scouts (Haiku) explore
-  4  questions  builders stop with BLOCKED -> Opus answers or asks you once, in a batch
-  5  gates      typecheck, lint, tests, build (no LLM cost)
-  6  review     reviewer-security, reviewer-code, reviewer-ui, ux-tester  (max 2 rework rounds)
-  7  approve    approver       Opus           APPROVE -> rebase + merge, ESCALATE -> your phone
+/factory:build <feature>
+  1  grill      Opus (in your session)   asks until nothing expensive is left unknown
+  2  spec       Opus                     spec.md + tickets.md (work packages, owned files)
+  2b checkpoint profile-specific         e.g. web design: prototype + screenshots -> you pick
+  3  build      builder x N   Sonnet     one git worktree each; Haiku scouts explore the code
+  4  questions  builders stop BLOCKED -> Opus answers, or asks you once in a batch
+  5  gates      typecheck, lint, tests, build + profile gates (no LLM cost)
+  6  review     code + security reviewers, profile reviewers, black-box testers (max 2 rounds)
+  7  approve    approver      Opus       APPROVE -> rebase + merge, ESCALATE -> you
 ```
 
-| Agent | Model | Preloaded skills | MCP access |
+## Plugins
+
+The repo is a Claude Code plugin marketplace called `pedros-factory`. Core is installed once per
+machine; each project turns on the profiles it needs.
+
+| Plugin | Agents | Black-box tester | Bundled MCP |
 |---|---|---|---|
-| orchestrator (`/factory`) | Opus | Pocock grill-with-docs, to-tickets, retro | project servers |
-| builder | Sonnet | tdd, codebase-design, ponytail, frontend-design | db, ui-kit, figma, context7 |
-| scout | Haiku | none | none (Read/Glob/Grep only) |
-| designer | Sonnet | frontend-design, ui-ux-pro-max | ui-kit, figma, playwright |
-| reviewer-security | Sonnet, Opus on risky jobs | none | db-readonly |
-| reviewer-code | Sonnet | code-review, ponytail-review | none |
-| reviewer-ui | Sonnet | impeccable | playwright, figma (no code access) |
-| ux-tester | Haiku | none | playwright only, locked to localhost:3000 |
-| approver | Opus | none | none, read-only |
+| `factory` (core) | scout (Haiku), builder (Sonnet), reviewer-code, reviewer-security, approver (Opus) | `user-tester`: runs your CLI/API/library from the docs only | Context7 |
+| `factory-webdev` | designer, reviewer-ui | `ux-tester`: drives a real browser from a URL, persona and goal | Playwright, Figma |
+| `factory-robotics` | reviewer-safety | `sim-tester`: runs Gazebo headless, judges ROS 2 topics, services and logs | none |
+| `factory-firmware` | reviewer-firmware | `fw-tester`: PlatformIO native tests, simulator, or a connected board from your safe list | none |
+| `factory-data` | reviewer-data | `data-tester`: smoke-trains on sample data, GPU if present, checks reproducibility | none |
 
-The pipeline (agents, skill, plugins) is **global**: it lives in `~/.claude` and every project
-sees it. What differs per project (UI kit, database) lives **in the project**: its `.mcp.json`
-names the servers `ui-kit`, `db` and `db-readonly`, and the agents only ever use those names.
+Dependencies install automatically and are pinned to exact commits in
+[`marketplace.json`](.claude-plugin/marketplace.json): core pulls
+[Matt Pocock's skills](https://github.com/mattpocock/skills) and
+[Ponytail](https://github.com/DietrichGebert/ponytail); the web profile adds
+[frontend-design](https://github.com/anthropics/claude-plugins-official),
+[UI UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) and
+[Impeccable](https://github.com/pbakaus/impeccable). Profiles can be combined, for example
+robotics + webdev for a robot with a web dashboard.
 
 ## Requirements
 
-- Linux x86_64 with systemd (tested on Ubuntu 24.04). An always-on homelab server is the point.
-- A Claude Pro or Max plan. On Pro, expect roughly 1 to 3 features per 5-hour window.
-- `git`, `curl`, `python3`, `tmux` (the bootstrap tells you if one is missing).
-- Optional: a Supabase project per app, a paid Figma seat for the Figma MCP.
+- Claude Code with a Claude Pro or Max plan. On Pro, expect roughly 1 to 3 features per 5-hour
+  window; profiles with more testers cost more.
+- `git`, and Node.js 18+ for the bundled MCP servers. Linux, macOS, or Windows through WSL.
+- Per profile: Node.js 22+ for HeroUI's MCP (webdev), ROS 2 + Gazebo (robotics), PlatformIO
+  (firmware), your Python environment (data). `/factory:init` checks and tells you what's missing.
 
 ## Install (once per machine)
 
-The repo is private, so clone it with the GitHub CLI (`gh auth login` first) or an SSH key:
+In Claude Code:
 
-```bash
-gh repo clone pedroolib/pipeline-kit ~/pipeline-kit
 ```
-```bash
-~/pipeline-kit/bootstrap.sh
+/plugin marketplace add pedroolib/pedros-factory
 ```
-
-The bootstrap needs no sudo and installs, in your home folder:
-
-- Node.js 22 (`~/.local/node`), Claude Code, and [rtk-oss](https://github.com/rtk-ai/rtk) 1.0.1,
-  with its global Bash hook that compresses command output
-- the plugins in [`plugins.txt`](plugins.txt): Matt Pocock's skills, Ponytail, frontend-design,
-  Figma, UI UX Pro Max, Impeccable
-- Playwright's Chromium, at the version `@playwright/mcp` expects
-- symlinks from `~/.claude/agents` and `~/.claude/skills/factory` to this repo
-- the `claude-rc@.service` systemd user unit
-
-At the end it prints what is left for you. On a fresh machine that is usually:
-
-```bash
-sudo npx -y playwright@<version> install-deps chromium   # exact line is printed; or: sudo apt-get install -y libasound2t64
 ```
-```bash
-sudo loginctl enable-linger $USER
+/plugin install factory@pedros-factory
 ```
-```bash
-claude
 ```
-In `claude`: run `/login`, then `/exit`. Then run `~/pipeline-kit/bootstrap.sh` again: it should end with "Nothing left to do".
-
-## Add a project
-
-```bash
-~/pipeline-kit/new-project.sh myapp --supabase-ref abcdefghijklmnopqrst
+/factory:setup
 ```
 
-| Flag | Default | Meaning |
-|---|---|---|
-| `--ui heroui\|shadcn\|none` | `heroui` | which component library the `ui-kit` MCP serves |
-| `--supabase-ref <ref>` | required unless `--no-db` | the ID in `supabase.com/dashboard/project/<ref>` |
-| `--no-db` | | no `db` / `db-readonly` servers |
+The same from a shell:
 
-It works on a new or an existing `~/projects/<name>` and never overwrites existing files. It writes
-`.mcp.json`, `.factory/stack.md`, `.claude/settings.json`, updates `.gitignore`, pre-approves the
-project's MCP servers, and creates the secrets file `~/.config/claude-rc/<name>.env` (chmod 600).
+```bash
+claude plugin marketplace add pedroolib/pedros-factory && claude plugin install factory@pedros-factory
+```
 
-Then follow the steps it prints:
+`/factory:setup` asks once and then optionally installs rtk (a pinned, checksum-verified binary
+plus a hook that compresses shell output for every agent), turns on Remote Control for every
+session so the Claude app on your phone can reach this machine, and sets your git identity.
 
-1. **Supabase token** (only with a database). Create one at
-   [supabase.com/dashboard/account/tokens](https://supabase.com/dashboard/account/tokens) and save
-   it with the printed `read -rsp ...` line. The input is hidden and stays out of shell history.
-   A token is used instead of a browser login because OAuth can't finish on a headless server.
-2. **First run by hand:** `cd ~/projects/<name> && claude remote-control`. Trust the folder,
-   enable Remote Control, choose `2` (worktree), then press Ctrl+C.
-3. **Run it for good:** `systemctl --user enable --now claude-rc@<name>`
-4. **On your phone:** Claude app > Code > open the `<name>` session, then run `/factory init`.
+## Set up a project
+
+Open Claude Code in the project folder and run:
+
+```
+/factory:init
+```
+
+1. **Profiles.** It detects likely profiles from your files, asks you to confirm, and installs
+   those profile plugins for this project only (`--scope project`), so a robotics repo never
+   loads web design skills. Then it asks you to run `/reload-plugins` and `/factory:init` again.
+2. **Questions.** Each profile asks what it needs: UI library and database for web, ROS distro
+   and sim launch command for robotics, safe dev boards for firmware, train and eval commands
+   for data. Answers go to `.factory/stack.md`, which every agent reads.
+3. **MCP servers, step by step.** It writes the project's `.mcp.json` (for example `ui-kit` for
+   HeroUI or shadcn, `db` and `db-readonly` for Supabase), pre-approves them, and walks you
+   through each account one step at a time:
+   - on a computer with a browser: `/mcp`, pick the server, Authenticate;
+   - on a server, or for services without browser sign-in: it tells you where to create a
+     token and gives you one command that saves it to `~/.config/claude-rc/<project>.env`
+     with hidden input. Tokens never go through the chat.
+
+   Then it runs `claude mcp list` and doesn't finish until every server shows Connected.
+4. **Commit.** It offers to commit `.claude/settings.json`, `.mcp.json`, `.factory/stack.md`
+   and `.gitignore`. Anyone who clones the repo gets the same profiles offered to them.
 
 ## Use it
 
 | Command | What it does |
 |---|---|
-| `/factory init` | grills you about the stack and fills in `.factory/stack.md` |
-| `/factory <feature>` | runs a feature through the whole pipeline |
-| `/factory status` | table of all jobs and their stage |
-| `/factory approve <job>` | merge a job the approver escalated to you |
-| `/factory rework <job> <note>` | send a job back to its builders with your note |
+| `/factory:build <feature>` | runs a feature through the whole pipeline |
+| `/factory:status` | table of all jobs and their stage |
+| `/factory:approve <job>` | merges a job the approver escalated to you |
+| `/factory:rework <job> <note>` | sends a job back to its builders with your note |
+| `/factory:doctor` | checks machine and project, prints the exact fix for anything missing |
+| `/factory:init` | re-run any time to add a profile or fix MCP setup |
 
-Job files (spec, tickets, reviews, decision) are in `.factory/jobs/<job-id>/` inside the project.
-Lessons from finished jobs accumulate in `.factory/LESSONS.md`, and every builder reads it.
+Job files (spec, tickets, reviews, decision) live in `.factory/jobs/<job-id>/`. Lessons from
+finished jobs accumulate in `.factory/LESSONS.md`, and builders read them on every job.
+
+**What always comes back to you:** anything a profile marks as risky. Database migrations, auth
+and payments (web); real hardware, safety limits and e-stop code (robotics); flashing a board
+that isn't on your safe list (firmware); changes to data splits or metrics (data). Plus jobs over
+600 changed lines or that hit the review-round limit.
+
+## Optional: run it 24/7 on a server
+
+A spare Linux machine (a homelab, a mini PC, a VPS) can host your projects so they keep working
+while your laptop is off, and you drive them from the Claude app.
+
+```bash
+gh repo clone pedroolib/pedros-factory ~/pedros-factory && ~/pedros-factory/server/bootstrap.sh
+```
+
+The bootstrap needs no sudo. It installs Node.js 22, Claude Code, rtk and the `factory` plugin
+in your home folder, plus a `claude-rc@<project>` systemd user service that keeps one Remote
+Control server per project running in tmux. It prints anything that needs root (usually
+`sudo loginctl enable-linger $USER`). Then, per project in `~/projects/<name>`:
+
+1. `claude` in the folder: trust it, `/login` if needed, run `/factory:init`. On a server,
+   init uses tokens in `~/.config/claude-rc/<name>.env` instead of browser sign-in.
+2. `claude remote-control` once: enable it, choose `2` (worktree), then Ctrl+C.
+3. `systemctl --user enable --now claude-rc@<name>`
+4. On your phone: Claude app > Code > open `<name>`.
 
 ## Update
 
-```bash
-cd ~/pipeline-kit && git pull && ./bootstrap.sh
+```
+/plugin marketplace update pedros-factory
 ```
 
-Changes to agents and the skill apply at once (they are symlinks). Restart running servers to
-pick up plugin updates: `systemctl --user restart claude-rc@<name>`.
+Dependency versions only move when this repo bumps the pinned commits, so every machine gets the
+same versions. On a server, also `git pull` in `~/pedros-factory`.
 
-## Customize
+## Add a profile
 
-- **One agent, one project:** copy it to `<project>/.claude/agents/<agent>.md` and edit it. A
-  project agent overrides the global one with the same name.
-- **Another UI kit or database:** edit the project's `.mcp.json`, but keep the server names
-  `ui-kit`, `db`, `db-readonly`. Update `.factory/stack.md` to match.
-- **Add a plugin for everyone:** add a line to `plugins.txt`, then re-run `bootstrap.sh`.
-- **Port:** the review agents' Playwright is locked to `http://localhost:3000`. To change it,
-  edit `--allowed-origins` in `global/agents/{ux-tester,reviewer-ui}.md`.
+A profile is a plugin in `plugins/factory-<name>/` with its agents and one hidden skill,
+`skills/profile/SKILL.md`, with these sections, which `/factory:init` and `/factory:build` read:
 
-## Layout
+| Section | Used by | Contains |
+|---|---|---|
+| INIT | `/factory:init` | questions, what to record in stack.md, MCP entries, secrets, tooling checks |
+| BUILD | build stages 2b and 3 | checkpoints before building, rules added to every builder brief |
+| GATES | build stage 5 | deterministic commands |
+| TESTERS | build stage 6 | black-box tester agents and exactly which inputs they get |
+| REVIEWERS | build stage 6 | extra reviewer agents |
+| ESCALATE | approver | risk tags that always go to a human |
 
-```
-bootstrap.sh              machine setup and update (idempotent, no sudo)
-new-project.sh            add the pipeline to ~/projects/<name>
-plugins.txt               plugins + marketplaces the agents depend on
-global/agents/*.md        the 8 agents, linked into ~/.claude/agents
-global/skills/factory/    the /factory orchestrator skill, linked into ~/.claude/skills
-project-template/         .claude/settings.json copied into each project (Opus, spawn depth 2)
-deploy/claude-rc@.service systemd user unit: one Remote Control server per project, in tmux
-scripts/link.sh           symlinks global/ into ~/.claude (called by bootstrap.sh)
-```
+Add the plugin to `marketplace.json` and to the detection table in
+`plugins/factory/skills/init/SKILL.md`.
 
 ## Troubleshooting
 
-- **`/mcp` in the app doesn't list `db` or `ui-kit`.** Expected: the app's menu only shows its
-  own connectors. The servers run on the server. Check there with
-  `cd ~/projects/<name> && set -a && . ~/.config/claude-rc/<name>.env && set +a && claude mcp list`.
-- **The app shows only GitHub/browser tools.** You opened a cloud session. Open the session named
-  after your project (it runs on your server) instead of starting a new one.
-- **Service keeps restarting.** `journalctl --user -u claude-rc@<name> -n 30` and
+- **`/mcp` in the Claude app doesn't list `db` or `ui-kit`.** The app's menu only shows its own
+  connectors. Run `/factory:doctor` in the session; it checks the project's servers.
+- **The app shows only GitHub and browser tools.** You opened a cloud session. Open the session
+  named after your project, which runs on your machine.
+- **"Failed to resolve base branch HEAD".** The repository has no commits; builders need one
+  for their worktrees. `git commit --allow-empty -m "Initial commit"`.
+- **A server service keeps restarting.** `journalctl --user -u claude-rc@<name> -n 30` and
   `tmux attach -t claude-rc-<name>`. "Already served by a terminal" means a manual
-  `claude remote-control` is still running in that folder: stop it.
-- **"Skill listing over budget" in debug logs.** Too many skills installed; descriptions get
-  truncated. Disable unused ones with `/skills`.
-- **A subagent can't find a skill.** Plugin skills are namespaced (`mattpocock-skills:tdd`).
-  Pocock's user-only skills (`grill-with-docs`, `to-tickets`, `retro`) can't be invoked by the
-  model, so `/factory` reads their `SKILL.md` files directly.
+  `claude remote-control` is still running in that folder.
+- **Black-box testers with shell access.** The CLI, simulation, firmware and data testers need
+  Bash to run your software, so "never read the source" is an instruction, not a hard wall.
+  The web UX tester has no shell or file tools at all.
 
 ## Uninstall
 
-```bash
-systemctl --user disable --now 'claude-rc@*'
 ```
-```bash
-rm ~/.config/systemd/user/claude-rc@.service ~/.claude/agents/{approver,builder,designer,reviewer-code,reviewer-security,reviewer-ui,scout,ux-tester}.md ~/.claude/skills/factory
+/plugin marketplace remove pedros-factory
 ```
 
-Plugins: `claude plugin uninstall <plugin>` for each line in `plugins.txt`. rtk: remove its hook
-from `~/.claude/settings.json` and delete `~/.local/bin/rtk`.
+This removes the marketplace and every plugin installed from it. rtk: delete `~/.local/bin/rtk`
+and its hook in `~/.claude/settings.json`. Server: `systemctl --user disable --now 'claude-rc@*'`.
+
+## License
+
+MIT for this repository. Each dependency keeps its own license.

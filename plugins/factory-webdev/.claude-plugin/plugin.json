@@ -1,0 +1,23 @@
+{
+  "name": "factory-webdev",
+  "displayName": "Pedro's Factory: Web",
+  "version": "2.0.0",
+  "description": "Web profile for Pedro's Factory: designer, UI reviewer, browser UX tester.",
+  "author": {
+    "name": "pedroolib",
+    "url": "https://github.com/pedroolib"
+  },
+  "repository": "https://github.com/pedroolib/pedros-factory",
+  "license": "MIT",
+  "keywords": [
+    "factory",
+    "agents",
+    "pipeline"
+  ],
+  "dependencies": [
+    "factory",
+    "frontend-design",
+    "ui-ux-pro-max",
+    "impeccable"
+  ]
+}
