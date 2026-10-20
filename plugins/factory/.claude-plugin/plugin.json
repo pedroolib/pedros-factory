@@ -1,7 +1,7 @@
 {
   "name": "factory",
   "displayName": "Pedro's Factory",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Core software-factory pipeline: grill, spec, parallel builders, gates, reviews, black-box user tester, approval.",
   "author": {
     "name": "pedroolib",

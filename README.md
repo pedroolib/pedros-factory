@@ -107,6 +107,7 @@ Open Claude Code in the project folder and run:
 | `/factory:approve <job>` | merges a job the approver escalated to you |
 | `/factory:rework <job> <note>` | sends a job back to its builders with your note |
 | `/factory:doctor` | checks machine and project, prints the exact fix for anything missing |
+| `/factory:remove` | removes the factory from this project (asks first, keeps your code); `--everything` uninstalls it from this machine |
 | `/factory:init` | re-run any time to add a profile or fix MCP setup |
 
 Job files (spec, tickets, reviews, decision) live in `.factory/jobs/<job-id>/`. Lessons from
@@ -179,6 +180,9 @@ Add the plugin to `marketplace.json` and to the detection table in
   The web UX tester has no shell or file tools at all.
 
 ## Uninstall
+
+One project: `/factory:remove` in it. Everything on this machine: `/factory:remove --everything`.
+Both list what they'll remove and ask first. By hand:
 
 ```
 /plugin marketplace remove pedros-factory
