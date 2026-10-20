@@ -123,7 +123,7 @@ A spare Linux machine (a homelab, a mini PC, a VPS) can host your projects so th
 while your laptop is off, and you drive them from the Claude app.
 
 ```bash
-gh repo clone pedroolib/pedros-factory ~/pedros-factory && ~/pedros-factory/server/bootstrap.sh
+git clone https://github.com/pedroolib/pedros-factory.git ~/pedros-factory && ~/pedros-factory/server/bootstrap.sh
 ```
 
 The bootstrap needs no sudo. It installs Node.js 22, Claude Code, rtk and the `factory` plugin
