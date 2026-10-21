@@ -1,10 +1,24 @@
 # Pedro's Factory
 
-A software factory for Claude Code. You describe a feature to one Opus orchestrator. It
-questions you until the spec is solid, runs parallel builders, checks the result with
-deterministic gates, reviewers and a **black-box tester that never sees the code**, then
-merges or asks you. It works for web apps, robotics, firmware, data/ML and plain code, on
-Linux, macOS and WSL, on a laptop or on an always-on server you reach from your phone.
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![Claude Code plugin marketplace](https://img.shields.io/badge/Claude%20Code-plugin%20marketplace-orange)
+![Status: early](https://img.shields.io/badge/status-early%20(0.x)-yellow)
+
+An orchestrated software-delivery pipeline for [Claude Code](https://claude.com/claude-code).
+A single Opus orchestrator turns a feature request into a reviewed, tested change: it
+interviews you until the specification is unambiguous, dispatches parallel builders in
+isolated git worktrees, verifies the result with deterministic gates, independent reviewers
+and a **black-box tester that never sees the source**, and then merges or escalates to you.
+
+It supports web applications, robotics, firmware, data/ML and general-purpose code on Linux,
+macOS and WSL, either on a workstation or on an always-on server driven from the Claude mobile app.
+
+**Contents:** [Pipeline](#pipeline) · [Plugins](#plugins) · [Requirements](#requirements) ·
+[Installation](#install-once-per-machine) · [Project setup](#set-up-a-project) · [Usage](#use-it) ·
+[Server mode](#optional-run-it-247-on-a-server) · [Extending](#add-a-profile) ·
+[Limitations](#limitations-and-security-notes) · [Contributing](#contributing) · [License](#license)
+
+## Pipeline
 
 ```
 /factory:build <feature>
@@ -107,8 +121,37 @@ Open Claude Code in the project folder and run:
 | `/factory:approve <job>` | merges a job the approver escalated to you |
 | `/factory:rework <job> <note>` | sends a job back to its builders with your note |
 | `/factory:doctor` | checks machine and project, prints the exact fix for anything missing |
-| `/factory:remove` | removes the factory from this project (asks first, keeps your code); `--everything` uninstalls it from this machine |
 | `/factory:init` | re-run any time to add a profile or fix MCP setup |
+| `/factory:remove` | removes the factory from this project (asks first, keeps your code); `--everything` uninstalls it from this machine |
+
+### Live dashboard (terminal)
+
+`dashboard/` is a Rust TUI (ratatui, Everforest colors) with one tab per project. Each
+orchestrator session from the last hour is drawn as a tree: the orchestrator, then every agent
+it spawned, each with its model, task, status (running, needs you, blocked, idle, done), cost
+and time. The side panel shows the project's jobs and a live feed of the selected agent's tool
+calls.
+
+`/factory:setup` (and `server/bootstrap.sh`) installs it into `~/.local/bin`: a prebuilt,
+checksum-verified binary for Linux and macOS, no Rust needed. Then, in any terminal:
+
+```bash
+factory-dash                                      # your pinned projects as tabs
+factory-dash ~/Projects/app ~/work/api            # just these, for this run
+```
+
+Tabs are the projects you pin. Press `a` to open the project picker (every folder with a
+`.factory/` up to 3 levels under `$HOME`, active ones marked) and `Enter` to pin or unpin. The list is saved in `~/.config/factory-dash/projects`, one path per
+line, so you can also edit it by hand. Until you pin anything (no saved list yet), the tabs are
+the projects that had agent activity in the last hour; once you unpin everything, no tabs are open.
+
+Hacking on it: `cargo install --path dashboard`. To release, bump `version` in
+`dashboard/Cargo.toml` and `DASH_VERSION` in `plugins/factory/scripts/install-dash.sh`, then
+push a tag `dash-v<version>`; `.github/workflows/dashboard-release.yml` builds and publishes it.
+
+Keys: `h`/`l` switch projects, `j`/`k` move between agents, `Enter` folds a subtree, `g`/`G`
+top/bottom, `Tab` moves to the activity log (`Enter` expands an entry), `a` projects, `r` rescan, `q` quit. Costs are estimates at API list prices, read from the
+transcripts in `~/.claude/projects`; a Pro or Max plan is not billed this way.
 
 Job files (spec, tickets, reviews, decision) live in `.factory/jobs/<job-id>/`. Lessons from
 finished jobs accumulate in `.factory/LESSONS.md`, and builders read them on every job.
@@ -164,6 +207,19 @@ A profile is a plugin in `plugins/factory-<name>/` with its agents and one hidde
 Add the plugin to `marketplace.json` and to the detection table in
 `plugins/factory/skills/init/SKILL.md`.
 
+## Limitations and security notes
+
+- **Early software (0.x).** Interfaces, file layouts and skill behaviour may change between releases.
+- **Cost.** Every job uses several model sessions. Plan limits apply; see [Requirements](#requirements).
+- **Black-box isolation is advisory for shell-based testers.** See the last item under
+  [Troubleshooting](#troubleshooting).
+- **Human gate.** Risky changes (migrations, auth, payments, hardware, safety limits, data splits
+  and metrics) are never merged automatically. Review escalations rather than approving by habit.
+- **Credentials.** Tokens are stored outside the repository in `~/.config/claude-rc/` and are
+  never passed through the chat. Dependencies are pinned to exact commits; review a bump before
+  you update.
+- **Dashboard costs** are estimates at API list prices, not billing data.
+
 ## Troubleshooting
 
 - **`/mcp` in the Claude app doesn't list `db` or `ui-kit`.** The app's menu only shows its own
@@ -197,6 +253,14 @@ ask first. By hand:
 
 This removes the marketplace and every plugin installed from it. rtk: delete `~/.local/bin/rtk`
 and its hook in `~/.claude/settings.json`. Server: `systemctl --user disable --now 'claude-rc@*'`.
+
+## Contributing
+
+Issues and pull requests are welcome. For a new profile, follow [Add a profile](#add-a-profile).
+Before opening a pull request, run `/factory:doctor` against a scratch project, and for dashboard
+changes run `cargo build` and `cargo test` in `dashboard/`. Keep changes focused and describe the
+behaviour change and how you verified it. Report security issues privately to the repository owner
+rather than in a public issue.
 
 ## License
 

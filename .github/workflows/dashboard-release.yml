@@ -1,0 +1,65 @@
+# Builds factory-dash for every platform install-dash.sh supports and publishes a GitHub release.
+# Release: bump dashboard/Cargo.toml and DASH_VERSION in plugins/factory/scripts/install-dash.sh,
+# then push a tag `dash-v<version>`.
+name: dashboard-release
+
+on:
+  push:
+    tags: ["dash-v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - { os: ubuntu-24.04, target: x86_64-unknown-linux-musl }
+          - { os: ubuntu-24.04-arm, target: aarch64-unknown-linux-musl }
+          - { os: macos-14, target: aarch64-apple-darwin }
+          - { os: macos-14, target: x86_64-apple-darwin }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tag matches Cargo.toml
+        shell: bash
+        run: |
+          want="dash-v$(grep -m1 '^version' dashboard/Cargo.toml | cut -d'"' -f2)"
+          [ "$want" = "$GITHUB_REF_NAME" ] || { echo "tag $GITHUB_REF_NAME != $want"; exit 1; }
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
+      - run: rustup target add ${{ matrix.target }}
+      - run: cargo test --locked
+        working-directory: dashboard
+        if: matrix.target != 'x86_64-apple-darwin'
+      - run: cargo build --release --locked --target ${{ matrix.target }}
+        working-directory: dashboard
+      - name: Package
+        shell: bash
+        run: |
+          tar czf "factory-dash-${{ matrix.target }}.tar.gz" -C "dashboard/target/${{ matrix.target }}/release" factory-dash
+      - uses: actions/upload-artifact@v4
+        with:
+          name: factory-dash-${{ matrix.target }}
+          path: factory-dash-${{ matrix.target }}.tar.gz
+
+  release:
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Checksums and release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd dist
+          sha256sum factory-dash-*.tar.gz > checksums.txt
+          gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" \
+            --title "factory-dash ${GITHUB_REF_NAME#dash-v}" --notes "Live TUI dashboard for Pedro's Factory." \
+            factory-dash-*.tar.gz checksums.txt

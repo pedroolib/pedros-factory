@@ -45,6 +45,9 @@ bash "$KIT/plugins/factory/scripts/install-rtk.sh" | grep -v '^Next:'
 if grep -q 'rtk hook claude' "$HOME/.claude/settings.json" 2>/dev/null; then echo "ok  rtk hook"
 else rtk init --global --auto-patch; fi
 
+step "factory-dash (live dashboard)"
+bash "$KIT/plugins/factory/scripts/install-dash.sh" | grep -v '^Run it' || echo "skipped factory-dash (optional; see the output above)"
+
 step "Pedro's Factory plugins"
 if claude plugin marketplace list 2>/dev/null | grep -q 'pedros-factory'; then
   claude plugin marketplace update pedros-factory >/dev/null 2>&1 || true; echo "ok  marketplace"
