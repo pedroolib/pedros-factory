@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo/banner.svg" alt="Pedro's Factory — an orchestrated software-delivery pipeline for Claude Code" width="100%">
+  <img src="https://raw.githubusercontent.com/pedroolib/pedros-factory/assets/banner.svg" alt="Pedro's Factory — an orchestrated software-delivery pipeline for Claude Code" width="100%">
 </p>
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
