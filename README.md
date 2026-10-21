@@ -1,11 +1,12 @@
-# Pedro's Factory
+<p align="center">
+  <img src="assets/logo/banner.svg" alt="Pedro's Factory — an orchestrated software-delivery pipeline for Claude Code" width="100%">
+</p>
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Claude Code plugin marketplace](https://img.shields.io/badge/Claude%20Code-plugin%20marketplace-orange)
 ![Platforms](https://img.shields.io/badge/platforms-Linux%20%7C%20macOS%20%7C%20WSL-lightgrey)
 
-**An orchestrated software-delivery pipeline for [Claude Code](https://claude.com/claude-code).**
-Describe a feature; the factory specifies it, builds it in parallel, verifies it independently
+Describe a feature to [Claude Code](https://claude.com/claude-code); the factory specifies it, builds it in parallel, verifies it independently
 and merges it, or hands the decision back to you.
 
 ```
