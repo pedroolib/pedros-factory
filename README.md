@@ -181,8 +181,15 @@ Add the plugin to `marketplace.json` and to the detection table in
 
 ## Uninstall
 
-One project: `/factory:remove` in it. Everything on this machine: `/factory:remove --everything`.
-Both list what they'll remove and ask first. By hand:
+One project: `/factory:remove` in it. It removes the profile plugins from that project, plus the
+`stack.md`, settings, server approvals and `.gitignore` lines that init added. It never touches
+your code. Unless you tick them, it keeps your job history, the MCP servers in `.mcp.json` (your
+app may use them) and your token file. On a server it prints the command to stop
+`claude-rc@<project>` instead of stopping the session you're in.
+
+Everything on this machine: `/factory:remove --everything` removes the marketplace and all its
+plugins, and optionally rtk and the Remote Control setting. Both list what they'll remove and
+ask first. By hand:
 
 ```
 /plugin marketplace remove pedros-factory
